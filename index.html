@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zostaniesz moją Walentynką? 👉👈</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Confetti JS -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Nunito (Great Polish support + cute rounded look) -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap&subset=latin-ext" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif; /* Zmiana czcionki na Nunito */
+            background-color: #ffe4e6;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* Floating Hearts Background Animation */
+        .bg-heart {
+            position: absolute;
+            color: rgba(255, 182, 193, 0.6);
+            animation: float 6s linear infinite;
+            z-index: -1;
+            user-select: none;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85); /* Troszkę mniej przezroczyste dla czytelności */
+            backdrop-filter: blur(10px);
+            border: 4px solid #fff;
+            box-shadow: 0 10px 40px -10px rgba(255, 105, 180, 0.3);
+        }
+
+        /* Button styling */
+        #noBtn {
+            transition: all 0.2s ease;
+            position: relative;
+            z-index: 50;
+        }
+
+        .wiggle {
+            animation: wiggle 2s linear infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 7% { transform: rotateZ(0); }
+            15% { transform: rotateZ(-8deg); }
+            20% { transform: rotateZ(5deg); }
+            25% { transform: rotateZ(-8deg); }
+            30% { transform: rotateZ(4deg); }
+            35%, 100% { transform: rotateZ(0); }
+        }
+
+        .hidden-content {
+            display: none;
+        }
+        
+        /* Animacja wejścia */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center relative select-none">
+
+    <!-- Background Hearts Container -->
+    <div id="bg-hearts" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+
+    <!-- Main Card -->
+    <div class="glass-panel p-6 md:p-10 rounded-3xl text-center max-w-lg w-full mx-4 relative z-10 flex flex-col items-center shadow-2xl">
+        
+        <!-- STEP 1: The Question -->
+        <div id="question-screen" class="flex flex-col items-center gap-6 w-full transition-all duration-300">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-pink-600 tracking-tight leading-tight drop-shadow-sm">
+                Hej Ty... <br>
+                <span class="text-2xl text-pink-400 font-bold">Mamy ważną sprawę Marcyśku 👀</span>
+            </h1>
+
+            <!-- Cute Meme Gif (Giphy Direct Link - Peach Goma / Mochi Cat) -->
+            <div class="relative w-56 h-56 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-pink-50">
+                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExajgxY214eXF4eXF4eXF4eXF4eXF4eXF4eXF4eXF4eXF4eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/McVH3gZ7yVjVvT5V8J/giphy.gif"
+                     alt="Cute bear asking question"
+                     class="w-full h-full object-cover"
+                     onerror="this.src='https://media.giphy.com/media/LpdlqTkgO2Lwwixwv7/giphy.gif'">
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-3xl font-extrabold text-gray-800 wiggle">
+                    Zostaniesz moją Walentynką?
+                </p>
+                <p class="text-sm text-pink-500 font-bold bg-white/80 px-3 py-1 rounded-full inline-block">
+                    📅 Rezerwacja na 14 Lutego 2026
+                </p>
+            </div>
+
+            <!-- Buttons Container -->
+            <div class="flex flex-row justify-center items-center gap-6 w-full mt-4 h-24 relative">
+                <!-- YES Button -->
+                <button onclick="handleYes()"
+                        class="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-extrabold py-4 px-10 rounded-2xl shadow-lg transform transition hover:scale-110 active:scale-95 text-2xl z-20 border-b-4 border-green-700">
+                    TAK! 💖
+                </button>
+
+                <!-- NO Button (The Runner) -->
+                <button id="noBtn"
+                        onmouseover="moveButton()"
+                        ontouchstart="moveButton()"
+                        onclick="moveButton()"
+                        class="bg-gray-300 hover:bg-red-400 text-gray-700 hover:text-white font-bold py-3 px-6 rounded-xl shadow text-lg whitespace-nowrap border-b-4 border-gray-400 hover:border-red-600">
+                    Nie :/
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: Success Screen -->
+        <div id="success-screen" class="hidden-content flex-col items-center gap-6 w-full">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-pink-600 animate-bounce drop-shadow-md">
+                JESTTT!!! 🎉
+            </h1>
+
+            <!-- Happy Meme Gif (Giphy Direct Link - Happy Dance) -->
+            <div class="relative w-64 h-64 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-green-50">
+                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExajgxY214eXF4eXF4eXF4eXF4eXF4eXF4eXF4eXF4eXF4eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/M90mJvfWfd5mbUuULX/giphy.gif"
+                     alt="Happy dancing cats"
+                     class="w-full h-full object-cover"
+                     onerror="this.src='https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif'">
+            </div>
+
+            <div class="bg-white/90 p-6 rounded-2xl shadow-inner transform rotate-1 w-full max-w-sm">
+                <p class="text-3xl text-gray-800 font-extrabold mb-4">
+                    Tego się nie spodziewałem 😳
+                </p>
+                
+                <p class="text-pink-600 font-bold mb-3 text-lg">
+                    Teraz trudna decyzja. Wybieraj:
+                </p>
+
+                <!-- Date Options Selection -->
+                <div class="flex flex-col gap-2 text-left mb-4">
+                    <label class="cursor-pointer group relative">
+                        <input type="radio" name="date-option" class="peer sr-only">
+                        <div class="p-3 rounded-xl border-2 border-pink-200 bg-pink-50 hover:bg-pink-100 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-600 transition-all font-bold flex items-center gap-2">
+                            🍷 Kolacja
+                        </div>
+                    </label>
+                    <label class="cursor-pointer group relative">
+                        <input type="radio" name="date-option" class="peer sr-only">
+                        <div class="p-3 rounded-xl border-2 border-pink-200 bg-pink-50 hover:bg-pink-100 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-600 transition-all font-bold flex items-center gap-2">
+                            🍿 Kino
+                        </div>
+                    </label>
+                    <label class="cursor-pointer group relative">
+                        <input type="radio" name="date-option" class="peer sr-only">
+                        <div class="p-3 rounded-xl border-2 border-pink-200 bg-pink-50 hover:bg-pink-100 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-600 transition-all font-bold flex items-center gap-2">
+                            🎭 Teatr
+                        </div>
+                    </label>
+                    <label class="cursor-pointer group relative">
+                        <input type="radio" name="date-option" class="peer sr-only">
+                        <div class="p-3 rounded-xl border-2 border-pink-200 bg-pink-50 hover:bg-pink-100 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-600 transition-all font-bold flex items-center gap-2">
+                            ✨ Coś innego? Daj znać!
+                        </div>
+                    </label>
+                </div>
+
+                <p class="text-sm text-gray-500 font-bold mt-2">
+                    (Ale outfit i tak zacznij wybierać)
+                </p>
+                
+                <p class="mt-4 text-gray-600 font-bold border-t-2 border-pink-100 pt-2">
+                    ~ Twój Edwin ❤️
+                </p>
+            </div>
+            
+            <button onclick="location.reload()" class="mt-6 text-gray-400 text-sm hover:text-pink-500 underline transition-colors font-bold">
+                Od początku
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Logic for the "No" button running away ---
+        const noBtn = document.getElementById('noBtn');
+        const questionScreen = document.getElementById('question-screen');
+        
+        let hoverCount = 0;
+        const funnyTexts = [
+            "Serio?",
+            "Oj weź...",
+            "Pudło!",
+            "Za wolno!",
+            "Nie da rady",
+            "Kliknij Zielone!",
+            "Ups...",
+            "Gdzie lecisz?",
+            "Jeszcze raz?",
+            "Wybierz mądrze"
+        ];
+
+        function moveButton(e) {
+            // Prevent default touch behavior if on mobile
+            if (e && e.type === 'touchstart') e.preventDefault();
+
+            const buttonWidth = noBtn.offsetWidth;
+            const buttonHeight = noBtn.offsetHeight;
+            
+            const maxX = window.innerWidth - buttonWidth - 50;
+            const maxY = window.innerHeight - buttonHeight - 50;
+
+            const randomX = Math.max(20, Math.random() * maxX);
+            const randomY = Math.max(20, Math.random() * maxY);
+
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+            
+            const randomRot = (Math.random() * 40) - 20;
+            noBtn.style.transform = `rotate(${randomRot}deg) scale(0.9)`;
+
+            noBtn.classList.remove('bg-gray-300', 'text-gray-700', 'border-gray-400');
+            noBtn.classList.add('bg-red-500', 'text-white', 'border-red-700');
+
+            hoverCount++;
+            const randomText = funnyTexts[Math.floor(Math.random() * funnyTexts.length)];
+            noBtn.innerText = randomText;
+        }
+
+        // --- Logic for the "Yes" button ---
+        function handleYes() {
+            const successScreen = document.getElementById('success-screen');
+            const questionScreen = document.getElementById('question-screen');
+            
+            questionScreen.style.display = 'none';
+            successScreen.style.display = 'flex';
+            successScreen.classList.add('fade-in');
+
+            triggerConfetti();
+            
+            let duration = 3000;
+            let end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#ec4899', '#f43f5e', '#a855f7']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#ec4899', '#f43f5e', '#a855f7']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        function triggerConfetti() {
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#ec4899', '#10b981', '#fbbf24']
+            });
+        }
+
+        function createHearts() {
+            const container = document.getElementById('bg-hearts');
+            const heartCount = 20;
+
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('bg-heart');
+                heart.innerHTML = ['❤️', '💖', '💝', '💕'][Math.floor(Math.random() * 4)];
+                
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.fontSize = (Math.random() * 30 + 10) + 'px';
+                heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                heart.style.opacity = Math.random() * 0.5 + 0.1;
+                
+                container.appendChild(heart);
+            }
+        }
+
+        createHearts();
+    </script>
+</body>
+</html>
