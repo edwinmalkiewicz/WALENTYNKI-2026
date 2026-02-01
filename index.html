@@ -8,15 +8,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Confetti JS -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Google Fonts: Nunito (Great Polish support + cute rounded look) -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap&subset=latin-ext" rel="stylesheet">
+    <!-- Google Fonts: Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap&subset=latin-ext" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         body {
-            font-family: 'Nunito', sans-serif; /* Zmiana czcionki na Nunito */
+            font-family: 'Nunito', sans-serif;
             background-color: #ffe4e6;
-            overflow: hidden;
-            touch-action: none;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            touch-action: manipulation;
+        }
+
+        /* Custom Scrollbar for events list */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f472b6;
+            border-radius: 10px;
         }
 
         /* Floating Hearts Background Animation */
@@ -34,8 +49,8 @@
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.85); /* Troszkę mniej przezroczyste dla czytelności */
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
             border: 4px solid #fff;
             box-shadow: 0 10px 40px -10px rgba(255, 105, 180, 0.3);
         }
@@ -61,16 +76,28 @@
         }
 
         .hidden-content {
-            display: none;
+            display: none !important;
         }
         
-        /* Animacja wejścia */
+        .flex-content {
+            display: flex !important;
+        }
+
+        /* Animations */
         .fade-in {
             animation: fadeIn 0.5s ease-in forwards;
         }
+        .slide-up {
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
+            from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -79,22 +106,22 @@
     <!-- Background Hearts Container -->
     <div id="bg-hearts" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
 
-    <!-- Main Card -->
-    <div class="glass-panel p-6 md:p-10 rounded-3xl text-center max-w-lg w-full mx-4 relative z-10 flex flex-col items-center shadow-2xl">
+    <!-- Main Container -->
+    <div id="main-container" class="glass-panel rounded-3xl text-center w-full max-w-lg mx-4 relative z-10 flex flex-col items-center shadow-2xl transition-all duration-500 overflow-hidden" style="max-height: 90vh;">
         
         <!-- STEP 1: The Question -->
-        <div id="question-screen" class="flex flex-col items-center gap-6 w-full transition-all duration-300">
+        <div id="question-screen" class="p-6 md:p-10 flex flex-col items-center gap-6 w-full h-full justify-center">
             <h1 class="text-3xl md:text-5xl font-extrabold text-pink-600 tracking-tight leading-tight drop-shadow-sm">
                 Hej Ty... <br>
                 <span class="text-2xl text-pink-400 font-bold">Mamy ważną sprawę Marcyśku 👀</span>
             </h1>
 
-            <!-- Cute Meme Gif (Giphy Direct Link - Peach Goma / Mochi Cat) -->
-            <div class="relative w-56 h-56 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-pink-50">
-                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExajgxY214eXF4eXF4eXF4eXF4eXF4eXF4eXF4eXF4eXF4eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/McVH3gZ7yVjVvT5V8J/giphy.gif"
-                     alt="Cute bear asking question"
+            <!-- GIF 1: Proszący piesek -->
+            <div class="relative w-64 h-64 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-pink-50 flex-shrink-0">
+                <img src="https://media.giphy.com/media/CT5Ye7uVJLFtu/giphy.gif"
+                     alt="Piesek proszący"
                      class="w-full h-full object-cover"
-                     onerror="this.src='https://media.giphy.com/media/LpdlqTkgO2Lwwixwv7/giphy.gif'">
+                     onerror="this.src='https://media.giphy.com/media/UuB5lh1bL1Dl6svihe/giphy.gif'">
             </div>
 
             <div class="space-y-2">
@@ -106,15 +133,12 @@
                 </p>
             </div>
 
-            <!-- Buttons Container -->
             <div class="flex flex-row justify-center items-center gap-6 w-full mt-4 h-24 relative">
-                <!-- YES Button -->
                 <button onclick="handleYes()"
                         class="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-extrabold py-4 px-10 rounded-2xl shadow-lg transform transition hover:scale-110 active:scale-95 text-2xl z-20 border-b-4 border-green-700">
                     TAK! 💖
                 </button>
 
-                <!-- NO Button (The Runner) -->
                 <button id="noBtn"
                         onmouseover="moveButton()"
                         ontouchstart="moveButton()"
@@ -125,99 +149,395 @@
             </div>
         </div>
 
-        <!-- STEP 2: Success Screen -->
-        <div id="success-screen" class="hidden-content flex-col items-center gap-6 w-full">
-            <h1 class="text-5xl md:text-6xl font-extrabold text-pink-600 animate-bounce drop-shadow-md">
+        <!-- STEP 2: Category Selection -->
+        <div id="category-screen" class="hidden-content flex-col items-center gap-4 w-full h-full p-6 overflow-y-auto">
+            <h1 class="text-4xl font-extrabold text-pink-600 animate-bounce">
                 JESTTT!!! 🎉
             </h1>
-
-            <!-- Happy Meme Gif (Giphy Direct Link - Happy Dance) -->
-            <div class="relative w-64 h-64 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-green-50">
-                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExajgxY214eXF4eXF4eXF4eXF4eXF4eXF4eXF4eXF4eXF4eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/M90mJvfWfd5mbUuULX/giphy.gif"
-                     alt="Happy dancing cats"
+            
+            <!-- GIF 2: Cieszący się piesek -->
+            <div class="relative w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-green-50 flex-shrink-0">
+                <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3FuY3dhdGR2N2VhZzhxeDQya2ZoZ2JlOWcwZmRpYzhmc3hxa2E4YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dudcZA9e14HIY/giphy.gif"
+                     alt="Szczęśliwy tańczący piesek"
                      class="w-full h-full object-cover"
-                     onerror="this.src='https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif'">
+                     onerror="this.src='https://media.giphy.com/media/10UeedrT5MIfPG/giphy.gif'">
             </div>
 
-            <div class="bg-white/90 p-6 rounded-2xl shadow-inner transform rotate-1 w-full max-w-sm">
-                <p class="text-3xl text-gray-800 font-extrabold mb-4">
+            <div class="text-center">
+                <p class="text-xl text-gray-800 font-extrabold">
                     Tego się nie spodziewałem 😳
                 </p>
-                
-                <p class="text-pink-600 font-bold mb-3 text-lg">
-                    Teraz trudna decyzja. Wybieraj:
-                </p>
-
-                <!-- Date Options Selection -->
-                <div class="flex flex-col gap-2 text-left mb-4">
-                    <label class="cursor-pointer group relative">
-                        <input type="radio" name="date-option" class="peer sr-only">
-                        <div class="p-3 rounded-xl border-2 border-pink-200 bg-pink-50 hover:bg-pink-100 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-600 transition-all font-bold flex items-center gap-2">
-                            🍷 Kolacja
-                        </div>
-                    </label>
-                    <label class="cursor-pointer group relative">
-                        <input type="radio" name="date-option" class="peer sr-only">
-                        <div class="p-3 rounded-xl border-2 border-pink-200 bg-pink-50 hover:bg-pink-100 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-600 transition-all font-bold flex items-center gap-2">
-                            🍿 Kino
-                        </div>
-                    </label>
-                    <label class="cursor-pointer group relative">
-                        <input type="radio" name="date-option" class="peer sr-only">
-                        <div class="p-3 rounded-xl border-2 border-pink-200 bg-pink-50 hover:bg-pink-100 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-600 transition-all font-bold flex items-center gap-2">
-                            🎭 Teatr
-                        </div>
-                    </label>
-                    <label class="cursor-pointer group relative">
-                        <input type="radio" name="date-option" class="peer sr-only">
-                        <div class="p-3 rounded-xl border-2 border-pink-200 bg-pink-50 hover:bg-pink-100 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-600 transition-all font-bold flex items-center gap-2">
-                            ✨ Coś innego? Daj znać!
-                        </div>
-                    </label>
-                </div>
-
-                <p class="text-sm text-gray-500 font-bold mt-2">
-                    (Ale outfit i tak zacznij wybierać)
-                </p>
-                
-                <p class="mt-4 text-gray-600 font-bold border-t-2 border-pink-100 pt-2">
-                    ~ Twój Edwin ❤️
+                <p class="text-gray-600 text-sm font-bold mt-1">
+                    Skoro już się zgodziłaś... wybierz, gdzie idziemy:
                 </p>
             </div>
+
+            <div class="grid grid-cols-1 gap-3 w-full max-w-xs mt-2">
+                <button onclick="showEvents('culture')" class="p-4 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-800 border-2 border-purple-200 transition-all flex items-center gap-3 font-bold text-left group">
+                    <div class="bg-white p-2 rounded-lg group-hover:scale-110 transition-transform">🎭</div>
+                    <div>
+                        <div class="text-lg">Teatr i Kultura</div>
+                        <div class="text-xs opacity-70">Spektakle i zwiedzanie</div>
+                    </div>
+                </button>
+
+                <button onclick="showEvents('music')" class="p-4 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-800 border-2 border-blue-200 transition-all flex items-center gap-3 font-bold text-left group">
+                    <div class="bg-white p-2 rounded-lg group-hover:scale-110 transition-transform">🎵</div>
+                    <div>
+                        <div class="text-lg">Muzyka</div>
+                        <div class="text-xs opacity-70">Koncerty i recitale</div>
+                    </div>
+                </button>
+
+                <button onclick="showEvents('party')" class="p-4 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-800 border-2 border-pink-200 transition-all flex items-center gap-3 font-bold text-left group">
+                    <div class="bg-white p-2 rounded-lg group-hover:scale-110 transition-transform">🍷</div>
+                    <div>
+                        <div class="text-lg">Kolacja & Impreza</div>
+                        <div class="text-xs opacity-70">Bale, rave i winko</div>
+                    </div>
+                </button>
+
+                <button onclick="showEvents('creative')" class="p-4 rounded-xl bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-2 border-yellow-200 transition-all flex items-center gap-3 font-bold text-left group">
+                    <div class="bg-white p-2 rounded-lg group-hover:scale-110 transition-transform">✨</div>
+                    <div>
+                        <div class="text-lg">Kreatywnie & Inne</div>
+                        <div class="text-xs opacity-70">Warsztaty i spacery</div>
+                    </div>
+                </button>
+
+                <button onclick="showEvents('cinema')" class="p-4 rounded-xl bg-red-100 hover:bg-red-200 text-red-800 border-2 border-red-200 transition-all flex items-center gap-3 font-bold text-left group">
+                    <div class="bg-white p-2 rounded-lg group-hover:scale-110 transition-transform">🍿</div>
+                    <div>
+                        <div class="text-lg">Kino</div>
+                        <div class="text-xs opacity-70">Romantyczny seans</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Events List -->
+        <div id="events-list-screen" class="hidden-content flex-col w-full h-full relative bg-gray-50">
+            <!-- Header -->
+            <div class="p-4 bg-white/80 backdrop-blur-md border-b flex items-center gap-3 sticky top-0 z-20 shadow-sm">
+                <button onclick="backToCategories()" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                    <i data-lucide="arrow-left" class="text-gray-600"></i>
+                </button>
+                <h2 id="category-title" class="text-xl font-bold text-gray-800">Wybierz wydarzenie</h2>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div id="events-container" class="flex-1 overflow-y-auto p-4 space-y-4 pb-20 text-left">
+                <!-- Events will be injected here JS -->
+            </div>
+        </div>
+
+        <!-- STEP 4: Final Confirmation -->
+        <div id="final-screen" class="hidden-content flex-col items-center justify-center gap-6 w-full h-full p-8">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-green-600 animate-bounce text-center">
+                Dobra Decyzja! ❤️
+            </h1>
+
+            <div class="bg-white p-6 rounded-2xl shadow-xl w-full border-2 border-pink-200 relative transform -rotate-1">
+                <div class="absolute -top-3 -right-3 bg-pink-500 text-white rounded-full p-2 shadow-lg animate-pulse">
+                    <i data-lucide="check" class="w-6 h-6"></i>
+                </div>
+                
+                <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Wybrane wydarzenie:</p>
+                <h2 id="final-event-name" class="text-2xl font-extrabold text-gray-800 mb-2 leading-tight"></h2>
+                
+                <div class="flex items-center gap-2 text-pink-600 font-bold mb-1">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    <span id="final-event-venue"></span>
+                </div>
+                <div class="flex items-center gap-2 text-gray-600 font-bold mb-4">
+                    <i data-lucide="clock" class="w-4 h-4"></i>
+                    <span id="final-event-time"></span>
+                </div>
+
+                <div id="final-link-container" class="mb-4 text-center">
+                    <!-- Link button injected here -->
+                </div>
+
+                <div class="border-t-2 border-dashed border-gray-200 pt-4 mt-2">
+                    <p class="text-gray-800 font-bold italic">
+                        "Już się nie mogę doczekać, Marcyśku!"
+                    </p>
+                    <p class="text-right mt-2 text-pink-500 font-bold">~ Twój Edwin</p>
+                </div>
+            </div>
             
-            <button onclick="location.reload()" class="mt-6 text-gray-400 text-sm hover:text-pink-500 underline transition-colors font-bold">
-                Od początku
+            <p class="text-gray-500 text-sm">(Zrób screena i mi wyślij!)</p>
+            
+            <button onclick="location.reload()" class="mt-4 px-6 py-2 bg-gray-200 rounded-full text-gray-600 font-bold hover:bg-gray-300 transition">
+                Zacznij od nowa
             </button>
         </div>
 
     </div>
 
     <script>
-        // --- Logic for the "No" button running away ---
-        const noBtn = document.getElementById('noBtn');
-        const questionScreen = document.getElementById('question-screen');
-        
-        let hoverCount = 0;
-        const funnyTexts = [
-            "Serio?",
-            "Oj weź...",
-            "Pudło!",
-            "Za wolno!",
-            "Nie da rady",
-            "Kliknij Zielone!",
-            "Ups...",
-            "Gdzie lecisz?",
-            "Jeszcze raz?",
-            "Wybierz mądrze"
+        // Init Icons
+        lucide.createIcons();
+
+        // --- Data: Events Database (Updated from JSON) ---
+        const allEvents = [
+            // KREATYWNIE / SPACERY
+            {
+                id: 1, category: 'creative', city: 'Toruń',
+                name: 'Miłość jest na Rynku – Walentynki dla Metropolii',
+                venue: 'Rynek Staromiejski', date: '12-15.02', time: '16:00-21:00',
+                desc: 'Romantyczna iluminacja, muzyka i zdjęcia na rynku. Wstęp wolny.',
+                price: 'Wstęp wolny',
+                link: 'https://torun.pl/pl/aktualnosc/walentynki-w-toruniu-love-square'
+            },
+            {
+                id: 7, category: 'creative', city: 'Toruń',
+                name: 'Warsztaty "Piernikowe serce z żywicy UV"',
+                venue: 'CSW Znaki Czasu', date: '14.02', time: '10:00',
+                desc: 'Tworzymy własne wisiorki lub breloki z żywicy.',
+                price: 'Opłata warsztatowa',
+                link: 'https://kulturawzasiegu.pl/wydarzenia/sztuka-uzytkowa-piernikowe-serce-z-zywicy-uv/'
+            },
+            {
+                id: 13, category: 'creative', city: 'Bydgoszcz',
+                name: 'Walentynkowe malowanie przy winie',
+                venue: 'Opera Nova, Bydgoszcz', date: '14.02', time: '18:30',
+                desc: 'Malowanie, wino bez limitu i przekąski. Dress code: czerwony!',
+                price: '199 zł',
+                link: 'https://www.biletomat.pl/bilety/walentynkowe-malowanie-przy-winie-w-bydgoszczy-bydgoszcz-237195/'
+            },
+            
+            // MUZYKA
+            {
+                id: 2, category: 'music', city: 'Toruń',
+                name: 'Koncert filmowy - Muzyka wielkiego ekranu',
+                venue: 'CKK Jordanki (TOS)', date: '14.02', time: '18:00',
+                desc: 'Przeboje Morricone, Williamsa i Roty na saksofon i orkiestrę.',
+                price: '79–109 zł',
+                link: 'https://www.tos.art.pl/wydarzenia/muzyka-wielkiego-ekranu-na-saksofon-zespol-i-orkiestre-symfoniczne-walentynki'
+            },
+            {
+                id: 6, category: 'music', city: 'Toruń',
+                name: 'Recital "Trzy Dźwięki Miłości"',
+                venue: 'Teatr Muzyczny', date: '14.02', time: '19:00',
+                desc: 'Piosenki Osieckiej i Przybory w jazzowych aranżacjach.',
+                price: '75 zł',
+                link: 'https://www.teatrmuzyczny.torun.pl/2597/trzy-dzwieki-milosci-tomasz-krajewski--gentelmens-jazz'
+            },
+            {
+                id: 14, category: 'music', city: 'Bydgoszcz',
+                name: 'Koncert "Polish Gentlemen"',
+                venue: 'Akademia Muzyczna', date: '14.02', time: '19:30',
+                desc: 'Eleganckie aranżacje polskich piosenek w klimacie jazz-pop.',
+                price: 'Bilety u organizatora',
+                link: 'https://bydgoszcz.twoje-miasto.pl/art-wydarzenia/koncert-walentynkowy-polish-gentlemen-krawczyk-i947251'
+            },
+
+            // KULTURA / TEATR
+            {
+                id: 3, category: 'culture', city: 'Toruń',
+                name: 'Zwiedzanie walentynkowe Teatru',
+                venue: 'Teatr im. Wilama Horzycy', date: '14.02', time: '14:00',
+                desc: 'Specjalne zwiedzanie teatru z przewodnikiem, kulisy i ciekawostki.',
+                price: 'Wg cennika',
+                link: 'https://teatr.torun.pl/wydarzenia/poznaj-teatr-zwiedzania-dla-widzow-indywidualnych/'
+            },
+            {
+                id: 4, category: 'culture', city: 'Toruń',
+                name: 'Spektakl "Kobieta, która ugotowała męża"',
+                venue: 'Aula UMK', date: '14.02', time: '19:00',
+                desc: 'Tragikomedia o miłosnym trójkącie. 120 minut śmiechu.',
+                price: 'od 120 zł',
+                link: 'https://biletyna.pl/spektakl/Kobieta-ktora-ugotowala-meza/Torun'
+            },
+            {
+                id: 5, category: 'culture', city: 'Toruń',
+                name: 'Czar Par – Improwizowany Tinder',
+                venue: 'Dwór Artusa', date: '14.02', time: '19:00',
+                desc: 'Artyści improwizują randki na podstawie profili widzów.',
+                price: '30 zł',
+                link: 'https://www.kupbilecik.pl/imprezy/192029/Toruń/Czar+Par+-+Improwizowany+Tinder/'
+            },
+            {
+                id: 11, category: 'culture', city: 'Toruń',
+                name: 'Stand-up "Human" – Błażej Krajewski',
+                venue: 'Klub OD NOWA', date: '14.02', time: '18:00',
+                desc: 'Nowy program Błażeja. (Uwaga: Może być wyprzedane!)',
+                price: 'Wyprzedane (?)',
+                link: 'https://odnowa.umk.pl/wydarzenie/blazej-krajewski/'
+            },
+
+            // KINO
+            {
+                id: 8, category: 'cinema', city: 'Toruń',
+                name: 'Film "Wrócicie do siebie"',
+                venue: 'Kino Centrum (CSW)', date: '14.02', time: '18:00',
+                desc: 'Hiszpańska komedia romantyczna o parze świętującej zerwanie.',
+                price: 'Bilety w kasie',
+                link: 'https://torun.pl/pl/print/node/70972'
+            },
+
+            // PARTY / KOLACJA
+            {
+                id: 9, category: 'party', city: 'Toruń',
+                name: 'Rave Wave 004 – The Muffin Man',
+                venue: 'Klub NRD', date: '14.02', time: '22:00',
+                desc: 'Dla fanów mocniejszego uderzenia. Techno/Trance z Berlina.',
+                price: 'Wg cennika',
+                link: 'https://www.biletomat.pl/bilety/rave-wave-004-nrd-the-muffin-man-torun-246354/'
+            },
+            {
+                id: 10, category: 'party', city: 'Toruń',
+                name: 'Retro Attack',
+                venue: 'Largo Club', date: '14.02', time: '21:00',
+                desc: 'Klasyczne hity klubowe. Grają Quiz & Jendrul.',
+                price: '30 zł',
+                link: 'https://cojestgrane.pl/polska/kujawsko-pomorskie/torun/wydarzenie/8ij4/w-te-walentynki-uciekamy-od-nudy-i-stawiamy-na-uderzenie-klasyki/jest'
+            },
+            {
+                id: 12, category: 'party', city: 'Bydgoszcz',
+                name: 'Bal Walentynkowy 2026',
+                venue: 'Rezydencja Sowa', date: '14.02', time: '19:00',
+                desc: 'Kolacja 3-daniowa, wino, bufet i DJ.',
+                price: '490 zł/para',
+                link: 'https://www.rezydencjasowa.pl/rezydencja/aktualnosci/szczegoly-aktualnosci'
+            },
+            {
+                id: 15, category: 'party', city: 'Bydgoszcz',
+                name: 'Romantyczny wieczór w Pałacu',
+                venue: 'Pałac Myślęcinek', date: '14.02', time: 'Wieczór',
+                desc: 'Kolacja, bufet, wino/wódka i tańce z DJ-em.',
+                price: 'ok. 350 zł/para',
+                link: 'https://www.facebook.com/palac.myslecinek'
+            }
         ];
 
+        // --- Logic: Navigation & Display ---
+
+        const questionScreen = document.getElementById('question-screen');
+        const categoryScreen = document.getElementById('category-screen');
+        const eventsListScreen = document.getElementById('events-list-screen');
+        const finalScreen = document.getElementById('final-screen');
+        const mainContainer = document.getElementById('main-container');
+
+        // Initial Yes Click
+        function handleYes() {
+            questionScreen.classList.add('hidden-content');
+            categoryScreen.classList.remove('hidden-content');
+            categoryScreen.classList.add('flex-content', 'fade-in');
+            triggerConfetti();
+        }
+
+        // Show Events based on Category
+        function showEvents(category) {
+            categoryScreen.classList.add('hidden-content');
+            categoryScreen.classList.remove('flex-content');
+            
+            eventsListScreen.classList.remove('hidden-content');
+            eventsListScreen.classList.add('flex-content', 'slide-up');
+
+            const filtered = allEvents.filter(e => e.category === category);
+            
+            const titles = {
+                'culture': 'Teatr i Kultura 🎭',
+                'music': 'Muzyka 🎵',
+                'party': 'Kolacja i Impreza 🍷',
+                'creative': 'Kreatywnie ✨',
+                'cinema': 'Kino 🍿'
+            };
+            document.getElementById('category-title').innerText = titles[category];
+
+            const container = document.getElementById('events-container');
+            container.innerHTML = '';
+
+            filtered.forEach(event => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative overflow-hidden group";
+                card.innerHTML = `
+                    <div class="absolute top-0 left-0 w-1 h-full ${getCategoryColor(event.category)}"></div>
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">${event.city}</span>
+                        <span class="text-xs font-bold px-2 py-1 rounded-full bg-gray-100 text-gray-600">${event.time}</span>
+                    </div>
+                    <h3 class="font-extrabold text-lg text-gray-800 leading-tight mb-1 pr-8">${event.name}</h3>
+                    <p class="text-sm text-pink-500 font-bold mb-2 flex items-center gap-1">
+                        <i data-lucide="map-pin" class="w-3 h-3"></i> ${event.venue}
+                    </p>
+                    <p class="text-sm text-gray-600 mb-3 leading-snug">${event.desc}</p>
+                    <div class="flex justify-between items-center mt-2 border-t pt-2 border-gray-50">
+                        <span class="text-xs font-bold text-gray-500">${event.price}</span>
+                        <div class="flex gap-2">
+                             <a href="${event.link}" target="_blank" class="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition" title="Zobacz szczegóły">
+                                <i data-lucide="external-link" class="w-5 h-5"></i>
+                            </a>
+                            <button onclick="selectEvent(${event.id})" class="px-4 py-2 bg-pink-500 text-white text-sm font-bold rounded-lg hover:bg-pink-600 transition shadow-sm hover:shadow active:scale-95">
+                                Wybieram to!
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function getCategoryColor(cat) {
+            const colors = {
+                'culture': 'bg-purple-500',
+                'music': 'bg-blue-500',
+                'party': 'bg-pink-500',
+                'creative': 'bg-yellow-500',
+                'cinema': 'bg-red-500'
+            };
+            return colors[cat] || 'bg-gray-500';
+        }
+
+        function backToCategories() {
+            eventsListScreen.classList.add('hidden-content');
+            eventsListScreen.classList.remove('flex-content');
+            
+            categoryScreen.classList.remove('hidden-content');
+            categoryScreen.classList.add('flex-content', 'fade-in');
+        }
+
+        function selectEvent(id) {
+            const event = allEvents.find(e => e.id === id);
+            if(!event) return;
+
+            eventsListScreen.classList.add('hidden-content');
+            eventsListScreen.classList.remove('flex-content');
+
+            finalScreen.classList.remove('hidden-content');
+            finalScreen.classList.add('flex-content', 'fade-in');
+
+            document.getElementById('final-event-name').innerText = event.name;
+            document.getElementById('final-event-venue').innerText = `${event.city}, ${event.venue}`;
+            document.getElementById('final-event-time').innerText = `${event.date} • godz. ${event.time}`;
+            
+            // Add link to final screen too
+            const linkContainer = document.getElementById('final-link-container');
+            linkContainer.innerHTML = `
+                <a href="${event.link}" target="_blank" class="inline-flex items-center gap-2 text-sm text-pink-500 font-bold hover:underline">
+                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                    Zobacz szczegóły wydarzenia
+                </a>
+            `;
+            lucide.createIcons();
+
+            triggerConfetti();
+        }
+
+
+        // --- Logic for the "No" button ---
+        const noBtn = document.getElementById('noBtn');
+        let hoverCount = 0;
+        const funnyTexts = ["Serio?", "Oj weź...", "Pudło!", "Za wolno!", "Nie da rady", "Kliknij Zielone!", "Ups...", "Gdzie lecisz?", "Jeszcze raz?", "Wybierz mądrze"];
+
         function moveButton(e) {
-            // Prevent default touch behavior if on mobile
-            if (e && e.type === 'touchstart') e.preventDefault();
+            if(e && e.type === 'touchstart') e.preventDefault();
 
             const buttonWidth = noBtn.offsetWidth;
             const buttonHeight = noBtn.offsetHeight;
-            
             const maxX = window.innerWidth - buttonWidth - 50;
             const maxY = window.innerHeight - buttonHeight - 50;
 
@@ -235,44 +555,7 @@
             noBtn.classList.add('bg-red-500', 'text-white', 'border-red-700');
 
             hoverCount++;
-            const randomText = funnyTexts[Math.floor(Math.random() * funnyTexts.length)];
-            noBtn.innerText = randomText;
-        }
-
-        // --- Logic for the "Yes" button ---
-        function handleYes() {
-            const successScreen = document.getElementById('success-screen');
-            const questionScreen = document.getElementById('question-screen');
-            
-            questionScreen.style.display = 'none';
-            successScreen.style.display = 'flex';
-            successScreen.classList.add('fade-in');
-
-            triggerConfetti();
-            
-            let duration = 3000;
-            let end = Date.now() + duration;
-
-            (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#ec4899', '#f43f5e', '#a855f7']
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#ec4899', '#f43f5e', '#a855f7']
-                });
-
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            }());
+            noBtn.innerText = funnyTexts[Math.floor(Math.random() * funnyTexts.length)];
         }
 
         function triggerConfetti() {
@@ -284,25 +567,21 @@
             });
         }
 
+        // Background Hearts
         function createHearts() {
             const container = document.getElementById('bg-hearts');
-            const heartCount = 20;
-
-            for (let i = 0; i < heartCount; i++) {
+            for (let i = 0; i < 20; i++) {
                 const heart = document.createElement('div');
                 heart.classList.add('bg-heart');
                 heart.innerHTML = ['❤️', '💖', '💝', '💕'][Math.floor(Math.random() * 4)];
-                
                 heart.style.left = Math.random() * 100 + 'vw';
                 heart.style.fontSize = (Math.random() * 30 + 10) + 'px';
                 heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
                 heart.style.animationDelay = Math.random() * 5 + 's';
                 heart.style.opacity = Math.random() * 0.5 + 0.1;
-                
                 container.appendChild(heart);
             }
         }
-
         createHearts();
     </script>
 </body>
