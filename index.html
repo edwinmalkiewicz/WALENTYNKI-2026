@@ -53,6 +53,10 @@
             backdrop-filter: blur(12px);
             border: 4px solid #fff;
             box-shadow: 0 10px 40px -10px rgba(255, 105, 180, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-gutter: stable;
         }
 
         /* Button styling */
@@ -107,7 +111,7 @@
     <div id="bg-hearts" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
 
     <!-- Main Container -->
-    <div id="main-container" class="glass-panel rounded-3xl text-center w-full max-w-lg mx-4 relative z-10 flex flex-col items-center shadow-2xl transition-all duration-500 overflow-hidden" style="max-height: 90vh;">
+    <div id="main-container" class="glass-panel rounded-3xl text-center w-full max-w-lg mx-4 relative z-10 flex flex-col items-center shadow-2xl transition-all duration-500">
         
         <!-- STEP 1: The Question -->
         <div id="question-screen" class="p-6 md:p-10 flex flex-col items-center gap-6 w-full h-full justify-center">
